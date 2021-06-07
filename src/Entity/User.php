@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
+ * @ApiResource();
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 class User implements UserInterface
