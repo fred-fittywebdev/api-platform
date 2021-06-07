@@ -2,13 +2,27 @@
 
 namespace App\Entity;
 
+
+
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Symfony\Validator\Validator;
+use Symfony\Component\Serializer\Annotation\SerializedName;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ApiResource();
+ * @ApiResource(
+ *      normalizationContext={"groups"={"user:read"}},
+ *      denormalizationContext={"groups"={"user:write"}}
+ * );
+ * @UniqueEntity("email", message="Cet email est déjà utilisé")
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 class User implements UserInterface
@@ -21,7 +35,10 @@ class User implements UserInterface
     private $id;
 
     /**
+     * @Groups("user:write", "user:read")
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private $email;
 
@@ -35,6 +52,23 @@ class User implements UserInterface
      * @ORM\Column(type="string")
      */
     private $password;
+
+    /**
+     * @SerializedName("password")
+     * @Groups("user:write")
+     * @Assert\NotBlank()
+     * @Assert\Length(
+     *      min = 8,
+     *      max = 30,
+     *      minMessage = "Votre mot de passe doit conenir au mmoins {{ limit }} caractères",
+     *      maxMessage = "Votre mot de passe ne doit pas dépasser {{ limit }} caractères"
+     * )
+     * @Assert\Regex(
+     *  "/^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/",
+     *  message = "Votre message doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial"
+     * )
+     */
+    private $plainPassword;
 
     public function getId(): ?int
     {
@@ -114,6 +148,18 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
     }
 }
