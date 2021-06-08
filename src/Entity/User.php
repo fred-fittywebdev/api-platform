@@ -23,6 +23,7 @@ use App\Controller\ValidUserAction;
  *      normalizationContext={"groups"={"user:read"}},
  *      denormalizationContext={"groups"={"user:write"}},
  *      collectionOperations={
+ *      "post",
  *      "validate"={
  *          "method"="PATCH",
  *          "deserialize"=false,
