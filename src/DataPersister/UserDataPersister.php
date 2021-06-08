@@ -35,6 +35,10 @@ class UserDataPersister implements DataPersisterInterface
             $data->eraseCredentials();
         }
 
+        if ($data->getId() === null) {
+            //send mail
+        }
+
         $this->entityManager->persist($data);
         $this->entityManager->flush();
     }

@@ -70,6 +70,27 @@ class User implements UserInterface
      */
     private $plainPassword;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isEnabled;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $tokenValidation;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $tokenValidationExpireAt;
+
+    public function __construct()
+    {
+        $this->isEnabled = false;
+        $this->generateValidationToken();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -161,5 +182,50 @@ class User implements UserInterface
         $this->plainPassword = $plainPassword;
 
         return $this;
+    }
+
+    public function getIsEnabled(): ?bool
+    {
+        return $this->isEnabled;
+    }
+
+    public function setIsEnabled(bool $isEnabled): self
+    {
+        $this->isEnabled = $isEnabled;
+
+        return $this;
+    }
+
+    public function getTokenValidation(): ?string
+    {
+        return $this->tokenValidation;
+    }
+
+    public function setTokenValidation(string $tokenValidation): self
+    {
+        $this->tokenValidation = $tokenValidation;
+
+        return $this;
+    }
+
+    public function getTokenValidationExpireAt(): ?\DateTimeInterface
+    {
+        return $this->tokenValidationExpireAt;
+    }
+
+    public function setTokenValidationExpireAt(\DateTimeInterface $tokenValidationExpireAt): self
+    {
+        $this->tokenValidationExpireAt = $tokenValidationExpireAt;
+
+        return $this;
+    }
+
+    public function generateValidationToken()
+    {
+        $expirationDate = new  \DateTime('+ 1day');
+        $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'));
+
+        $this->setTokenValidation($token);
+        $this->setTokenValidationExpireAt($expirationDate);
     }
 }
