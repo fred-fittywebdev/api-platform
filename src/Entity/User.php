@@ -16,11 +16,20 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Core\Bridge\Symfony\Validator\Validator;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use App\Controller\ValidUserAction;
 
 /**
  * @ApiResource(
  *      normalizationContext={"groups"={"user:read"}},
- *      denormalizationContext={"groups"={"user:write"}}
+ *      denormalizationContext={"groups"={"user:write"}},
+ *      collectionOperations={
+ *      "validate"={
+ *          "method"="PATCH",
+ *          "deserialize"=false,
+ *          "path"="/users/{tokenValidation}/validate",
+ *          "controller"=ValidUserAction::class        
+ *            }
+ *       }
  * );
  * @UniqueEntity("email", message="Cet email est déjà utilisé")
  * @ORM\Entity(repositoryClass=UserRepository::class)
