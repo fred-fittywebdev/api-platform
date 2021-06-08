@@ -5,16 +5,19 @@ namespace App\DataPersister;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
+use App\Service\Mailer;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserDataPersister implements DataPersisterInterface
 {
     private $entityManager;
     private $userPasswordEncoder;
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordEncoderInterface $userPasswordEncoder)
+    private $mailer;
+    public function __construct(EntityManagerInterface $entityManager, UserPasswordEncoderInterface $userPasswordEncoder, Mailer $mailer)
     {
         $this->entityManager = $entityManager;
         $this->userPasswordEncoder = $userPasswordEncoder;
+        $this->mailer = $mailer;
     }
 
     public function supports($data): bool
@@ -36,7 +39,11 @@ class UserDataPersister implements DataPersisterInterface
         }
 
         if ($data->getId() === null) {
-            //send mail
+            $subject = "Registration mail";
+            $template = "emails/registration.html.twig";
+            $dataMail = ['tokenValidation' => $data->getTokenValidation()];
+
+            $this->mailer->send($data, $subject, $template, $dataMail);
         }
 
         $this->entityManager->persist($data);
